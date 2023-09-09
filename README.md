@@ -1,19 +1,19 @@
 # S1mpleFisher
 # OSRS Fishing Bot for RuneLite – Simba
 
-This is a simple and easy-to-use fishing bot for Old School RuneScape (OSRS) that uses Simba and runs with RuneLite. It can fish at almost any fishing location, drop the fish, and afk like a real player. It is designed to be fast, efficient, and safe.
+This is a bot script that allows you to fish in OSRS with ease and speed using Simba and RuneLite. It can automatically drop the fish and mimic a real player’s afk behaviour at different fishing locations. It is a simple, efficient, and safe solution for fishing automation.
 
 ## Features
-- Drops the fish when the inventory is full.
-- Can afk like a real player by moving the mouse randomly and occasionally checking the stats or inventory.
-- Supports breaking to log out and rest for a random period of time after a certain amount of fishing.
-- Has a simple and user-friendly interface that allows the user to customize the bot settings.
+- Excludes certain items from dropping when specified by the user.
+- Mimics a real player’s inactivity and afk behaviour.
+- Supports breaking to log out and rest for a random duration that is determined by the script.
+- Provides a simple and user-friendly interface that enables the user to adjust the bot settings within Simba.
 
 ## Requirements
 - Simba installed. Simba is a program that can simulate mouse and keyboard actions. You can download Simba from [here]. Make sure you use the **32-bit** version of Simba.
-- A RuneLite account and client. RuneLite is a free and open-source client for OSRS that provides various features and plugins. You can download RuneLite from [here].
-- A valid OSRS account. You can create an OSRS account from [here].
-- A fishing rod, feathers, bait, cage, harpoon, or barbarian rod depending on the fishing method you want to use.
+- A RuneLite client. RuneLite is a free and open-source client for OSRS that provides various features and plugins. You can download RuneLite from [here].
+- An OSRS account. You can create an OSRS account from [here].
+- The required items depending on the fishing method you want to use.
 
 ## Installation
 - Download the latest version of the bot script from [here] and save it in your Simba scripts folder.
