@@ -1,5 +1,5 @@
 # S1mpleFisher
-# OSRS Fishing Bot with RuneLite – Simba
+# OSRS Fishing Bot for RuneLite – Simba
 
 This is a simple and easy-to-use fishing bot for Old School RuneScape (OSRS) that uses Simba and runs with RuneLite. It can fish at almost any fishing location, drop the fish, and afk like a real player. It is designed to be fast, efficient, and safe.
 
