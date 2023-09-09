@@ -16,11 +16,12 @@ This is a bot script that allows you to fish in OSRS with ease and speed using S
 - The required items depending on the fishing method you want to use.
 
 ## Installation
-- Download the latest version of the bot script from [here] and save it in your Simba scripts folder.
+- Download the latest version of the bot script from [here](https://github.com/S1mple-Scripts/S1mpleFisher/releases/tag/v1.0) and save the .simba file in your Simba scripts folder.
 - Run Simba and load the bot script.
-- Run RuneLite and log in to your OSRS account.
+- Add the required details in the script.
+- Run RuneLite and load the provided RuneLite Profile then log in to your OSRS account.
 - Go to the fishing spot you want to fish at and make sure you have the required fishing equipment in your inventory or bank.
-- Start the bot script in Simba and follow the instructions on the interface.
+- Start the bot script in Simba and follow any instructions.
 
 ## Disclaimer
 - This bot script is for educational purposes only and should not be used to gain an unfair advantage in OSRS. Use it at your own risk.
