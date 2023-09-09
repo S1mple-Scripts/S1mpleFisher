@@ -1,0 +1,558 @@
+program S1mpleFisher;
+{$I SRL/osr.simba}
+//{$DEFINE SRL_DISABLE_REMOTEINPUT}
+const
+  Local_Version := 1.0;
+
+{How many minutes should the script run for?}
+  RunTime = (240);
+
+{Player details}
+  LOGIN_NAME = '';
+  LOGIN_PASS = '';
+
+{AFK TBox} //You will receive an Access violation if you do not set this!
+  AFKBound1 = {set this as the bounds for your AFK section outside of the RuneLite client};
+  AFKBound2 = {set this as the bounds for your AFK section outside of the RuneLite client};
+  AFKBound3 = {set this as the bounds for your AFK section outside of the RuneLite client};
+  AFKBound4 = {set this as the bounds for your AFK section outside of the RuneLite client};
+
+{Mouse settings}
+  MouseSpeed = (15);
+  MouseGravity = (3);
+  MouseWind = (1);
+
+{Various Up_Texts}
+  FishingSpotUpText = 'Rod Fishing spot'; //what is the up text for the fishing spot you are botting?
+  FishingGear1UpText = 'Fly fishing rod'; //what items in your inventory do you not want to drop?
+  FishingGear2UpText = 'Feather'; //what items in your inventory do you not want to drop?
+  FishingGear3UpText = 'Feather'; //what items in your inventory do you not want to drop?
+  FishingGear4UpText = 'Feather'; //what items in your inventory do you not want to drop?
+
+var
+  DidRedClick, TimeUp, FirstLogin, DTMFirstTime: Boolean;
+  IsFishingDTM, FishSpotFS, RunTimeConverted: Int32;
+  RunTimer: TStopWatch;
+  FishingGearUpText: TStringArray = [FishingGear1UpText, FishingGear2UpText, FishingGear3UpText, FishingGear4UpText];
+  FishingGearItemUpText: TRSItemArray = [FishingGear1UpText, FishingGear2UpText, FishingGear3UpText, FishingGear4UpText];
+
+{***************************************************************************************************
+ ***************************************************************************************************
+ *************** ONLY MODIFY THE SCRIPT BELOW IF YOU ARE AN EXPERIENCED SCRIPT MAKER ***************
+ ***************************************************************************************************
+ ***************************************************************************************************}
+{OVERRIDES BELOW}
+procedure TKeyboard.Send(const Text: String); override;
+begin
+  Self.Send(Text, Random(40, 260), Random(32, 160), Random(40, 285));
+end;
+
+procedure TKeyboard.Send(const Text: String; KeyPressAfter: Integer); override;
+begin
+  Self.Send(Text);
+  Wait(35, 244, wdLeft);
+  Self.PressKey(KeyPressAfter);
+end;
+
+function TRSLogin.EnterField(Field, Details: String): Boolean; override;
+var
+  B: TBox;
+begin
+  if Self.FindText(Details + ' ') then
+    Exit(True);
+  if Self.FindText(Field, B) then
+  begin
+    B.X1 := B.X2;
+    B.X2 := B.X1 + 250;
+    // Move caret
+    while not WaitUntil(SRL.CountColor($00FFFF, B) > 15, 100, SRL.TruncatedGauss(530, 2532)) do
+    begin
+      if not Self.IsOpen() then
+        Exit(False);
+      Keyboard.PressKey(VK_TAB);
+    end;
+    // Erase field
+    while SRL.CountColor($FFFFFF, B) > 0 do
+      Keyboard.PressKey(VK_BACK);
+    Keyboard.Send(Details);
+    Wait(0, 1000, wdLeft);
+    Result := True;
+  end;
+end;
+
+procedure TMM2MS.Setup; override;
+begin
+  Self.Name := 'MM2MS';
+  //Self.ZoomLevel := -1;
+end;
+
+procedure TMouse.Setup; override;
+begin
+  Self.Name := 'Mouse';
+  Self.Speed := MouseSpeed + RandomRange(- 3, 3);
+  Self.Gravity := MouseGravity + RandomRange(- 2, 4);
+  Self.Wind := MouseWind + RandomRange(- 1, 3);
+  Self.MissChance := RandomRange(1, 2);
+  Self.Distribution := MOUSE_DISTRIBUTION_GAUSS;
+  Self.CanIdle := True;
+{$IFDEF SRL_DEBUG_MOUSE}
+  Self.OnTeleport := @ Self._DebugCallback;
+{$ENDIF}
+end;
+
+function TMouse.Miss(P: TPoint): TPoint; override;
+var
+  Range: Int32;
+  Miss: Double;
+  Temp: Double := Self.MissChance;
+begin
+  Self.MissChance := 0;
+  try
+    Range := Trunc(Power(Self.Position().DistanceTo(P), 0.10));
+    Miss := SRL.SkewedRand(0.95, 0.1, 1.05);
+    Result.X := Trunc((1 - Miss) * Self.Position().X + Miss * P.X);
+    Result.Y := Trunc((1 - Miss) * Self.Position().Y + Miss * P.Y);
+    Result.X += SRL.NormalRange(- Range, Range);
+    Result.Y += SRL.NormalRange(- Range, Range);
+    Self.Move(Result);
+    if SRL.Dice(50) then
+      Wait(0, 865, wdLeft);
+  finally
+    Self.MissChance := Temp;
+  end;
+end;
+
+function TRSInventory.ClickSlot(Slot: Int32; Option: String = ''): Boolean; override;
+begin
+  if Self.HoverSlot(Slot) then
+  begin
+    if (Option <> '') then
+      Result := ChooseOption.Select(Option)
+    else
+    begin
+      if (not MainScreen.IsUpText(FishingGearUpText)) then
+        Mouse.Click(MOUSE_LEFT);
+      case random(10) of
+        0 .. 4: WaitEx(10, 5);
+        5 .. 10:;
+      end;
+      Result := True;
+    end;
+  end;
+end;
+
+procedure TMouse.Scroll(Amount: Int32; Down: Boolean); override;
+var
+  i, step, k: Int32 = 1;
+  P: TPoint;
+begin
+  P := Self.Position();
+  step := Round(SRL.GaussRand(6.0, 0.6));
+  for i := 1 to Amount do
+  begin
+    if Down then
+      ScrollMouse(P.X, P.Y, 1)
+    else
+      ScrollMouse(P.X, P.Y, - 1);
+    if k mod step = 0 then
+    begin
+      step := Round(SRL.GaussRand(6.0, 0.6));
+      WaitEx(10, 10);
+      k := 0;
+    end
+    else
+      Wait(10, 10);
+    Inc(k);
+  end;
+end;
+
+{S1MPLE FUNCTIONS BELOW}
+function S1mpleRandomTPoint(Min, Max, WaitA, WaitB: Integer): Boolean;
+var
+  Mousey: TPoint;
+begin
+  Mousey := Mouse.Position();
+  Mousey.x := Mousey.x + RandomRange(Min, Max);
+  Mousey.y := Mousey.y + RandomRange(Min, Max);
+  case random(3) of
+    1: Mouse.Move(Mousey);
+    2: Mouse.Miss(Mousey);
+  end;
+  Wait(RandomRange(WaitA, WaitB));
+  Result := True;
+  exit;
+end;
+
+{function S1mpleUpdater(): Boolean;
+var
+  newFile: integer;
+  newScript, newFilePath: string;
+  online_Version: extended;
+begin
+  online_Version := strToFloat(getPage('https://raw.githubusercontent.com/S1mple-Scripts/S1mpleFisher/main/VERSION'));
+  if online_Version > Local_Version then
+  begin
+    WriteLn('S1mpleUpdater: Downloading latest version from GitHub');
+    newScript := getPage('https://raw.githubusercontent.com/S1mple-Scripts/S1mpleFisher/main/S1mpleFisher');
+    newFilePath := scriptPath + 'S1mpleFisherV' + toStr(online_Version) + '.simba';
+    newFile := rewriteFile(newFilePath, true);
+    if not writeFileString(newFile, newScript) then
+    begin
+      writeLn('Could not write to ' + newFilePath);
+      terminatescript();
+    end;
+    closeFile(newFile);
+    WriteLn('Latest version downloaded to ' + newFilePath);
+    WriteLn('S1mpleUpdater: Downloaded latest version from GitHub');
+    Result := True;
+    terminateScript();
+  end;
+end;}
+{function S1mpleBirdy(direction: String): Boolean;
+var
+  MainScreenBox: TBox;
+  x, y: integer;
+begin
+  WaitEx(1000, 555);
+  MainScreenBox := MainScreen.GetPlayerBox;
+  x := (mainScreen.x1 + mainScreen.x2) div 2 + RandomRange(- 100, -100);
+  y := (mainScreen.y1 + mainScreen.y2) div 2 + RandomRange(- 75, 50);
+  MoveMouse(x, y);
+  if (direction = "up") then
+  begin
+    x := (mainScreen.x1 + mainScreen.x2) div 2 + RandomRange(- 100, 100);
+    y := mainScreen.y1 - RandomRange(-60, 120);
+  end
+  else if (direction = "down") then
+  begin
+    x := (mainScreen.x1 + mainScreen.x2) div 2 + RandomRange(- 60, 60);
+    y := mainScreen.y2 + RandomRange(100, 100);
+  end
+  else if (direction = "left") then
+  begin
+    x := mainScreen.x1 - RandomRange(-60, 120);
+    y := (mainScreen.y1 + mainScreen.y2) div 2 + RandomRange(- 100, 200);
+  end
+  else if (direction = "right") then
+  begin
+    x := mainScreen.x2 + RandomRange(-60, 120);
+    y := (mainScreen.y1 + mainScreen.y2) div 2 + RandomRange(- 100, 200);
+  end;
+  Mouse.DragTo(X, Y, MOUSE_MIDDLE);
+  Result := True;
+end; }
+function S1mpleBreak(): Integer;
+var
+  Time1, Time2: Integer;
+  StartTime: TDateTime;
+  DoubleTime: TDateTime;
+  BreakTimeInMinutes: Double;
+  BreakTimeInWholeMinutes: Integer;
+  BreakTimeInSeconds: Integer;
+begin
+  StartTime := Now;
+  DoubleTime := EncodeTime(0, RandomRange(15, 60), 0, 0);
+  case Random(101) of
+    1 .. 70:
+      begin
+        Time1 := 0;
+        Time2 := 60000;
+      end;
+    71 .. 83:
+      begin
+        Time1 := 0;
+        Time2 := 120000;
+      end;
+    84 .. 91:
+      begin
+        Time1 := 120000;
+        Time2 := 180000;
+      end;
+    92 .. 96:
+      begin
+        Time1 := 180000;
+        Time2 := 900000;
+      end;
+    97 .. 100:
+      begin
+        Time1 := 1800000;
+        Time2 := 2700000;
+        StartTime := Now;
+        DoubleTime := EncodeTime(0, RandomRange(15, 60), 0, 0);
+      end;
+  end;
+  Result := RandomRange(Time1, Time2 + 1);
+  if (Now - StartTime >= DoubleTime) then
+    Result := Result * 2;
+  // Double the result if the condition is met
+  BreakTimeInMinutes := Result / (60 * 1000);
+  BreakTimeInWholeMinutes := Trunc(BreakTimeInMinutes);
+  BreakTimeInSeconds := Round((BreakTimeInMinutes - BreakTimeInWholeMinutes) * 60);
+  WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleBreak: Commencing ', BreakTimeInWholeMinutes, 'm ', BreakTimeInSeconds, 's break');
+  Wait(Result);
+end;
+
+{S1MPLE PROCEDURES BELOW}
+procedure S1mplePaint();
+const
+  BORDER = '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
+  THANKS = '~~~~~~~~~~~~Thank you for using S1mpleFisher~~~~~~~~~~~~';
+  MADE_FOR = '~~~~~~~~~~~~~~Made for the Simba Community~~~~~~~~~~~~~~';
+  CREATED_BY = '~~~~~~~~~~~~~~~~~~Created by S1mple :)~~~~~~~~~~~~~~~~~~';
+begin
+  WriteLn(BORDER);
+  WriteLn(THANKS);
+  WriteLn(BORDER);
+  WriteLn(MADE_FOR);
+  WriteLn(BORDER);
+  WriteLn(CREATED_BY);
+  WriteLn(BORDER);
+end;
+
+procedure S1mpleDTM();
+begin
+  if DTMFirstTime = True then
+  begin
+    IsFishingDTM := DTMFromString('mLgAAAHicY2JgYLAGYjsgVgBiVSBm+A/FUMAIxQwMAEnkAsE=');
+  end
+  else
+  begin
+    freeDTM(IsFishingDTM);
+    IsFishingDTM := DTMFromString('mLgAAAHicY2JgYLAGYjsgVgBiVSBm+A/FUMAIxQwMAEnkAsE=');
+  end;
+end;
+
+procedure S1mpleTerminate();
+begin
+  WriteLn([(Time)], 'S1mpleFisher: Terminating script');
+  S1mpleDTM();
+  case random(3) of
+    1: Logout.ClickLogout;
+  end;
+  freeDTM(IsFishingDTM);
+  TerminateScript;
+end;
+
+procedure S1mpleLogin();
+begin
+  Login.AddPlayer(LOGIN_NAME, LOGIN_PASS, '', []);
+  if Login.Players[0].Password <> '' then
+  begin
+    WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleLogin: Commencing');
+    Login.LoginPlayer;
+    WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleLogin: Completed');
+    MainScreen.SetHighestPitch();
+  end
+  else
+  begin
+    WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleLogin: Player details not found');
+    S1mpleTerminate();
+  end;
+end;
+
+procedure S1mpleFish();
+var
+  TPA: TPointArray;
+  ATPA: T2DPointArray;
+  Finder: TRSObjectFinder;
+  x, y: Int32;
+  OverlayBox: TBox;
+begin
+  if login.IsOpen or Chat.IsOpen then
+    exit;
+  OverlayBox := IntToBox(0, 0, 222, 222);
+  if (FindDTM(IsFishingDTM, x, y, OverlayBox)) then
+    exit;
+  if FishSpotFS = 20 then
+    TerminateScript();
+  WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: Commencing');
+  WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: Searching for highlighted fishing spot');
+  Finder.Colors += CTS2(52666, 1, 0.01, 0.01);
+  Finder.Grow := 0;
+  Finder.ClusterDistance := 3;
+  ATPA := MainScreen.FindObject(Finder);
+  if (ATPA.Len > 0) then
+  begin
+    WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: Highlighted fishing spot has been found');
+    ATPA.SortByIndex(Mainscreen.Center);
+    while (not MainScreen.IsUpText(FishingSpotUpText)) do
+      for TPA in ATPA do
+      begin
+        WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: Moving mouse to highlighted fishing spot');
+        case random(5) of
+          1: Mouse.Miss(TPA.Median());
+        end;
+        Mouse.Move(TPA.Mean());
+        WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: Confirming user specified Up_Text');
+        if MainScreen.IsUpText(FishingSpotUpText) then
+        begin
+          WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: User specified Up_Text confirmed');
+          WaitEx(14, 14);
+          WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: Clicking on highlighted fishing spot');
+          Mouse.Click(Mouse_left);
+          if MainScreen.DidRedClick then
+          begin
+            case random(3) of
+              1: S1mpleRandomTPoint(- 50, 50, 0, 555);
+            end;
+            WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: Completed');
+            DidRedClick := true;
+            WriteLn('help');
+            exit;
+          end;
+        end
+        else
+        begin
+          WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: Failed');
+          DidRedClick := false;
+          (FishSpotFS + 1);
+          exit;
+        end;
+      end;
+  end
+  else
+  begin
+     (FishSpotFS + 1);
+    exit;
+  end;
+end;
+
+procedure S1mpleAFK();
+var
+  x, y: Int32;
+  AFK: Boolean;
+  OverlayBox, AFKBox: TBox;
+  FishWaitTimer: TStopWatch;
+  FishWaitLimit: Int32;
+begin
+  if login.IsOpen or Chat.IsOpen then
+    exit;
+  if FirstLogin = True then
+  begin
+    MainScreen.SetHighestPitch();
+    FirstLogin := False;
+  end;
+  OverlayBox := IntToBox(0, 0, 222, 222);
+  if (not DidRedClick) then
+    exit;
+  FishSpotFS := 0;
+  FishWaitLimit := RandomRange(3333, 13333);
+  FishWaitTimer.Start;
+  AFKBox := [AFKBound1, AFKBound2, AFKBound3, AFKBound4];
+  WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleAFK: Commencing');
+  case random(20) of
+    0 .. 15: AFK := True;
+    17 .. 19: AFK := False;
+  end;
+  if AFK = True then
+  begin
+    Mouse.Move(AFKBox, true);
+    case random(26) of
+      0 .. 4, 15 .. 17: Mouse.Click(Mouse_left);
+      5 .. 14, 21 .. 26: Mouse.Scroll(1, true);
+      18 .. 20: Mouse.Scroll(20, false);
+    end;
+    while (not FindDTM(IsFishingDTM, x, y, OverlayBox)) and (FishWaitTimer.ElapsedTime() <= FishWaitLimit) do
+      begin
+        WaitEx(100, 10);
+        if Chat.IsOpen then
+          exit;
+      end;
+    while (FindDTM(IsFishingDTM, x, y, OverlayBox)) do
+      S1mpleBreak();
+  end
+  else if (not FindDTM(IsFishingDTM, x, y, OverlayBox)) and (FishWaitTimer.ElapsedTime() <= FishWaitLimit) then
+    Wait(RandomRange(0, 3121));
+  WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleAFK: Completed');
+end;
+
+procedure S1mpleDrop();
+var
+  i: Int32;
+  slots: array of Int32;
+begin
+  if login.IsOpen then
+    exit;
+  if Chat.IsOpen then
+  begin
+    if not Inventory.IsOpen then
+      Inventory.Open;
+    WaitEx(100, 100);
+    if (not Inventory.FindItems(FishingGearItemUpText)) then
+    begin
+      WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleDrop: One or more UserItems not found');
+      S1mpleTerminate();
+    end;
+    WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleDrop: Commencing');
+    case random(10) of
+      0 .. 8:
+        begin
+          slots := [0..27];
+        end;
+      9:
+        begin
+          slots := [0,4,8,12,16,20,24,  1,5,9,13,17,21,25,  2,6,10,14,18,22,26, 3,7,11,15,19,23,27];
+        end;
+    end;
+    for i := Low(slots) to High(slots) do
+      Inventory.ClickSlot(slots[i]);
+    WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleDrop: Completed');
+    if Inventory.IsOpen then
+    begin
+      WaitEx(500, 250);
+      Keyboard.PressKey(VK_ESCAPE);
+    end;
+    S1mpleDTM();
+    exit;
+  end
+  else
+    exit;
+end;
+
+procedure S1mpleSetup();
+begin
+  FirstLogin := True;
+  DTMFirstTime := True;
+  ClearDebug();
+  S1mplePaint();
+  //S1mpleUpdater();
+  WriteLn([(Time)], 'S1mpleFisher: Commencing');
+  RunTimeConverted := (RunTime * 60000 + Random(0, 10000) - Random(0, 10000));
+  RunTimer.Start;
+  S1mpleDTM();
+end;
+
+procedure S1mpleLoop();
+begin
+  if RunTimer.ElapsedTime() >= (RunTimeConverted) then
+    TimeUp := True;
+  if login.IsOpen then
+    S1mpleLogin();
+  S1mpleFish();
+  S1mpleAFK();
+  S1mpleDrop();
+end;
+
+procedure S1mpleShutdown();
+begin
+  S1mplePaint();
+  S1mpleDTM();
+  if TimeUp = True then
+  begin
+    WriteLn([(Time)], 'S1mpleFisher: Completed RunTime - Shutting down');
+    WriteLn([(Time)], 'S1mpleFisher: RunTime was ', (RunTimer.ElapsedTime() / 60000), ' minutes');
+    case random(2) of
+      1: Logout.ClickLogout;
+    end;
+  end
+  else
+    WriteLn([(Time)], 'S1mpleFisher: Shutting down - RunTime incomplete');
+end;
+
+begin
+  S1mpleSetup();
+  repeat
+    S1mpleLoop();
+  until (TimeUp = True);
+  S1mpleShutdown();
+end.
