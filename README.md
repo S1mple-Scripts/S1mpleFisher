@@ -1,2 +1,2 @@
 # S1mpleFisher
-OSRS Fishing Bot for Simba
+RuneLite Fishing Bot for OSRS on Simba
