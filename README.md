@@ -1,3 +1,5 @@
+![BANNER](https://github.com/S1mple-Scripts/S1mpleFisher/assets/144496153/73d2803b-35c4-43f3-988c-257b273893ee)
+
 # S1mpleFisher – Bot Fishing Anywhere in OSRS!
 ## 2023 FREE RuneLite Fishing Bot OSRS – Simba
 
