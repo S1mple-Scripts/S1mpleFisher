@@ -34,8 +34,7 @@ This is a fishing bot script that allows you to fish anywhere in OSRS with ease 
 
 ### Proggies
 ![S1mpleFisher 10Hr Proggy Small](https://github.com/S1mple-Scripts/S1mpleFisher/assets/144496153/8d63939d-b477-4be4-934c-55ab3d77aa64)
-
-[30 Minute Timelapse of S1mpleFisher on Youtube](https://www.youtube.com/watch?v=pnJPGgosMSs)
+[30 Minute Timelapse video of S1mpleFisher on Youtube](https://www.youtube.com/watch?v=pnJPGgosMSs)
 
 ### Disclaimer
 - This bot script is for educational purposes only and should not be used to gain an unfair advantage in OSRS. Use it at your own risk.
