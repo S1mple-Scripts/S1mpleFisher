@@ -3,7 +3,7 @@
 # S1mpleFisher – Bot Fishing Anywhere in OSRS!
 ## 2023 FREE RuneLite Fishing Bot OSRS – Simba
 
-This is a fishing bot script that allows you to fish anywhere in OSRS with ease and speed using Simba and RuneLite. It can automatically drop the fish and mimic a real player’s AFK behaviour at different fishing locations. It is a simple, efficient, and safe solution for fishing automation.
+This is a fishing bot script that allows you to fish anywhere in OSRS with ease and speed using Simba and RuneLite. It automatically drops what is caught, while mimicking a real player’s AFK behaviour at different fishing locations. It is a simple, efficient, and safe solution for fishing automation.
 
 ### Features
 - Excludes certain slots from being dropped when specified by the user.
