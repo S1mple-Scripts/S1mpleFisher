@@ -2,39 +2,51 @@ program S1mpleFisher;
 {$I SRL/osr.simba}
 //{$DEFINE SRL_DISABLE_REMOTEINPUT}
 const
-  Local_Version := 1.0;
+  Local_Version := 1.1;
 
-{How many minutes should the script run for?}
-  RunTime = (240);
+{Script session time in minutes}
+  RunTime = (124);
 
-{Player details}
+{Your login details – YOU MUST SET THESE FOR THE SCRIPT TO WORK PROPERLY!}
   LOGIN_NAME = '';
   LOGIN_PASS = '';
 
-{AFK TBox} //You will receive an Access violation if you do not set this!
-  AFKBound1 = {set this as the bounds for your AFK section outside of the RuneLite client};
-  AFKBound2 = {set this as the bounds for your AFK section outside of the RuneLite client};
-  AFKBound3 = {set this as the bounds for your AFK section outside of the RuneLite client};
-  AFKBound4 = {set this as the bounds for your AFK section outside of the RuneLite client};
+{Where your mouse should AFK  – YOU MUST SET THESE FOR THE SCRIPT TO WORK PROPERLY!}
+  AFKBound1 = 0;
+  AFKBound2 = 0;
+  AFKBound3 = 0;
+  AFKBound4 = 0;
 
-{Mouse settings}
-  MouseSpeed = (15);
-  MouseGravity = (3);
-  MouseWind = (1);
+{Unique user mouse settings – Please adjust to increase your unique user profile}
+  MouseSpeed = (13);
+  MouseGravity = (11);
+  MouseWind = (3);
 
-{Various Up_Texts}
-  FishingSpotUpText = 'Rod Fishing spot'; //what is the up text for the fishing spot you are botting?
-  FishingGear1UpText = 'Fly fishing rod'; //what items in your inventory do you not want to drop?
-  FishingGear2UpText = 'Feather'; //what items in your inventory do you not want to drop?
-  FishingGear3UpText = 'Feather'; //what items in your inventory do you not want to drop?
-  FishingGear4UpText = 'Feather'; //what items in your inventory do you not want to drop?
+{Fishing spot up text – YOU MUST SET THESE FOR THE SCRIPT TO WORK PROPERLY!}
+  FishingSpotUpText = 'Rod Fishing spot';
+
+{Fishing gear up text for items you need in your inventory – YOU MUST SET THESE FOR THE SCRIPT TO WORK PROPERLY!}
+  FishingGearUpText1 = 'Fly fishing rod';
+  FishingGearUpText2 = 'Feather';
+  FishingGearUpText3 = 'Feather';
+  FishingGearUpText4 = 'Feather';
+
+{Do you want to drop your entire inventory?}
+  DropALLItems := False;
+
+{Slots to not drop – IGNORE IF DROPALLITEMS SET TO TRUE!}
+  DontDropSlot1 = 0;
+  DontDropSlot2 = 1;
+  DontDropSlot3 = 0;
+  DontDropSlot4 = 0;
+  DontDropSlot5 = 0;
 
 var
   DidRedClick, TimeUp, FirstLogin, DTMFirstTime: Boolean;
   IsFishingDTM, FishSpotFS, RunTimeConverted: Int32;
   RunTimer: TStopWatch;
-  FishingGearUpText: TStringArray = [FishingGear1UpText, FishingGear2UpText, FishingGear3UpText, FishingGear4UpText];
-  FishingGearItemUpText: TRSItemArray = [FishingGear1UpText, FishingGear2UpText, FishingGear3UpText, FishingGear4UpText];
+  FishingGearUpText: TRSItemArray = [FishingGearUpText1, FishingGearUpText2, FishingGearUpText3, FishingGearUpText4];
+  DontDropSlots: array of Int32;
 
 {***************************************************************************************************
  ***************************************************************************************************
@@ -89,56 +101,15 @@ end;
 procedure TMouse.Setup; override;
 begin
   Self.Name := 'Mouse';
-  Self.Speed := MouseSpeed + RandomRange(- 3, 3);
-  Self.Gravity := MouseGravity + RandomRange(- 2, 4);
-  Self.Wind := MouseWind + RandomRange(- 1, 3);
-  Self.MissChance := RandomRange(1, 2);
+  Self.Speed := MouseSpeed + RandomRange(- 1, 1);
+  Self.Gravity := MouseGravity + RandomRange(- 2, 2);
+  Self.Wind := MouseWind + RandomRange(- 2, 2);
+  Self.MissChance := RandomRange(5, 15);
   Self.Distribution := MOUSE_DISTRIBUTION_GAUSS;
   Self.CanIdle := True;
 {$IFDEF SRL_DEBUG_MOUSE}
   Self.OnTeleport := @ Self._DebugCallback;
 {$ENDIF}
-end;
-
-function TMouse.Miss(P: TPoint): TPoint; override;
-var
-  Range: Int32;
-  Miss: Double;
-  Temp: Double := Self.MissChance;
-begin
-  Self.MissChance := 0;
-  try
-    Range := Trunc(Power(Self.Position().DistanceTo(P), 0.10));
-    Miss := SRL.SkewedRand(0.95, 0.1, 1.05);
-    Result.X := Trunc((1 - Miss) * Self.Position().X + Miss * P.X);
-    Result.Y := Trunc((1 - Miss) * Self.Position().Y + Miss * P.Y);
-    Result.X += SRL.NormalRange(- Range, Range);
-    Result.Y += SRL.NormalRange(- Range, Range);
-    Self.Move(Result);
-    if SRL.Dice(50) then
-      Wait(0, 865, wdLeft);
-  finally
-    Self.MissChance := Temp;
-  end;
-end;
-
-function TRSInventory.ClickSlot(Slot: Int32; Option: String = ''): Boolean; override;
-begin
-  if Self.HoverSlot(Slot) then
-  begin
-    if (Option <> '') then
-      Result := ChooseOption.Select(Option)
-    else
-    begin
-      if (not MainScreen.IsUpText(FishingGearUpText)) then
-        Mouse.Click(MOUSE_LEFT);
-      case random(10) of
-        0 .. 4: WaitEx(10, 5);
-        5 .. 10:;
-      end;
-      Result := True;
-    end;
-  end;
 end;
 
 procedure TMouse.Scroll(Amount: Int32; Down: Boolean); override;
@@ -166,81 +137,24 @@ begin
   end;
 end;
 
-{S1MPLE FUNCTIONS BELOW}
-function S1mpleRandomTPoint(Min, Max, WaitA, WaitB: Integer): Boolean;
-var
-  Mousey: TPoint;
+function TRSInventory.ClickSlot(Slot: Int32; Option: String = ''): Boolean; override;
 begin
-  Mousey := Mouse.Position();
-  Mousey.x := Mousey.x + RandomRange(Min, Max);
-  Mousey.y := Mousey.y + RandomRange(Min, Max);
-  case random(3) of
-    1: Mouse.Move(Mousey);
-    2: Mouse.Miss(Mousey);
+  if Self.HoverSlot(Slot) then
+  begin
+    if (Option <> '') then
+      Result := ChooseOption.Select(Option)
+    else
+    begin
+      Mouse.Click(MOUSE_LEFT);
+      case random(10) of
+        0 .. 4: WaitEx(30, 30);
+      end;
+      Result := True;
+    end;
   end;
-  Wait(RandomRange(WaitA, WaitB));
-  Result := True;
-  exit;
 end;
 
-{function S1mpleUpdater(): Boolean;
-var
-  newFile: integer;
-  newScript, newFilePath: string;
-  online_Version: extended;
-begin
-  online_Version := strToFloat(getPage('https://raw.githubusercontent.com/S1mple-Scripts/S1mpleFisher/main/VERSION'));
-  if online_Version > Local_Version then
-  begin
-    WriteLn('S1mpleUpdater: Downloading latest version from GitHub');
-    newScript := getPage('https://raw.githubusercontent.com/S1mple-Scripts/S1mpleFisher/main/S1mpleFisher');
-    newFilePath := scriptPath + 'S1mpleFisherV' + toStr(online_Version) + '.simba';
-    newFile := rewriteFile(newFilePath, true);
-    if not writeFileString(newFile, newScript) then
-    begin
-      writeLn('Could not write to ' + newFilePath);
-      terminatescript();
-    end;
-    closeFile(newFile);
-    WriteLn('Latest version downloaded to ' + newFilePath);
-    WriteLn('S1mpleUpdater: Downloaded latest version from GitHub');
-    Result := True;
-    terminateScript();
-  end;
-end;}
-{function S1mpleBirdy(direction: String): Boolean;
-var
-  MainScreenBox: TBox;
-  x, y: integer;
-begin
-  WaitEx(1000, 555);
-  MainScreenBox := MainScreen.GetPlayerBox;
-  x := (mainScreen.x1 + mainScreen.x2) div 2 + RandomRange(- 100, -100);
-  y := (mainScreen.y1 + mainScreen.y2) div 2 + RandomRange(- 75, 50);
-  MoveMouse(x, y);
-  if (direction = "up") then
-  begin
-    x := (mainScreen.x1 + mainScreen.x2) div 2 + RandomRange(- 100, 100);
-    y := mainScreen.y1 - RandomRange(-60, 120);
-  end
-  else if (direction = "down") then
-  begin
-    x := (mainScreen.x1 + mainScreen.x2) div 2 + RandomRange(- 60, 60);
-    y := mainScreen.y2 + RandomRange(100, 100);
-  end
-  else if (direction = "left") then
-  begin
-    x := mainScreen.x1 - RandomRange(-60, 120);
-    y := (mainScreen.y1 + mainScreen.y2) div 2 + RandomRange(- 100, 200);
-  end
-  else if (direction = "right") then
-  begin
-    x := mainScreen.x2 + RandomRange(-60, 120);
-    y := (mainScreen.y1 + mainScreen.y2) div 2 + RandomRange(- 100, 200);
-  end;
-  Mouse.DragTo(X, Y, MOUSE_MIDDLE);
-  Result := True;
-end; }
+{S1MPLE FUNCTIONS BELOW}
 function S1mpleBreak(): Integer;
 var
   Time1, Time2: Integer;
@@ -284,7 +198,6 @@ begin
   Result := RandomRange(Time1, Time2 + 1);
   if (Now - StartTime >= DoubleTime) then
     Result := Result * 2;
-  // Double the result if the condition is met
   BreakTimeInMinutes := Result / (60 * 1000);
   BreakTimeInWholeMinutes := Trunc(BreakTimeInMinutes);
   BreakTimeInSeconds := Round((BreakTimeInMinutes - BreakTimeInWholeMinutes) * 60);
@@ -293,6 +206,96 @@ begin
 end;
 
 {S1MPLE PROCEDURES BELOW}
+procedure S1mpleRemove(var Arr: array of Int32; const Item: Int32);
+var
+  i: Int32;
+  AIndex: Int32;
+begin
+  AIndex := - 1;
+  // find the index of the item in the array
+  for i := Low(Arr) to High(Arr) do
+    if Arr[i] = Item then
+    begin
+      AIndex := i;
+      Break;
+    end;
+  // if the item was found, remove it
+  if AIndex > - 1 then
+  begin
+    for i := AIndex to High(Arr) - 1 do
+      Arr[i] := Arr[i + 1];
+    SetLength(Arr, Length(Arr) - 1);
+  end;
+end;
+
+procedure S1mpleRandomTPoint(Min, Max, WaitA, WaitB: Integer);
+var
+  Mousey: TPoint;
+begin
+  Mousey := Mouse.Position();
+  Mousey.x := Mousey.x + RandomRange(Min, Max);
+  Mousey.y := Mousey.y + RandomRange(Min, Max);
+  Mouse.Move(Mousey);
+  Wait(RandomRange(WaitA, WaitB));
+  exit;
+end;
+
+{procedure S1mpleUpdater();
+var
+  newFile: integer;
+  newScript, newFilePath: string;
+  online_Version: extended;
+begin
+  online_Version := strToFloat(getPage('https://raw.githubusercontent.com/S1mple-Scripts/S1mpleFisher/main/VERSION'));
+  if online_Version > Local_Version then
+  begin
+    WriteLn('S1mpleUpdater: Downloading latest version from GitHub');
+    newScript := getPage('https://raw.githubusercontent.com/S1mple-Scripts/S1mpleFisher/main/S1mpleFisher');
+    newFilePath := scriptPath + 'S1mpleFisherV' + toStr(online_Version) + '.simba';
+    newFile := rewriteFile(newFilePath, true);
+    if not writeFileString(newFile, newScript) then
+    begin
+      writeLn('Could not write to ' + newFilePath);
+      terminatescript();
+    end;
+    closeFile(newFile);
+    WriteLn('Latest version downloaded to ' + newFilePath);
+    WriteLn('S1mpleUpdater: Downloaded latest version from GitHub');
+    terminateScript();
+  end;
+end;}
+{procedure S1mpleBirdy(direction: String);
+var
+  MainScreenBox: TBox;
+  x, y: integer;
+begin
+  WaitEx(1000, 555);
+  MainScreenBox := MainScreen.GetPlayerBox;
+  x := (mainScreen.x1 + mainScreen.x2) div 2 + RandomRange(- 100, -100);
+  y := (mainScreen.y1 + mainScreen.y2) div 2 + RandomRange(- 75, 50);
+  MoveMouse(x, y);
+  if (direction = "up") then
+  begin
+    x := (mainScreen.x1 + mainScreen.x2) div 2 + RandomRange(- 100, 100);
+    y := mainScreen.y1 - RandomRange(-60, 120);
+  end
+  else if (direction = "down") then
+  begin
+    x := (mainScreen.x1 + mainScreen.x2) div 2 + RandomRange(- 60, 60);
+    y := mainScreen.y2 + RandomRange(100, 100);
+  end
+  else if (direction = "left") then
+  begin
+    x := mainScreen.x1 - RandomRange(-60, 120);
+    y := (mainScreen.y1 + mainScreen.y2) div 2 + RandomRange(- 100, 200);
+  end
+  else if (direction = "right") then
+  begin
+    x := mainScreen.x2 + RandomRange(-60, 120);
+    y := (mainScreen.y1 + mainScreen.y2) div 2 + RandomRange(- 100, 200);
+  end;
+  Mouse.DragTo(X, Y, MOUSE_MIDDLE);
+end;}
 procedure S1mplePaint();
 const
   BORDER = '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
@@ -379,25 +382,20 @@ begin
       for TPA in ATPA do
       begin
         WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: Moving mouse to highlighted fishing spot');
-        case random(5) of
-          1: Mouse.Miss(TPA.Median());
-        end;
         Mouse.Move(TPA.Mean());
         WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: Confirming user specified Up_Text');
         if MainScreen.IsUpText(FishingSpotUpText) then
         begin
           WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: User specified Up_Text confirmed');
-          WaitEx(14, 14);
           WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: Clicking on highlighted fishing spot');
           Mouse.Click(Mouse_left);
           if MainScreen.DidRedClick then
           begin
-            case random(3) of
-              1: S1mpleRandomTPoint(- 50, 50, 0, 555);
+            case random(5) of
+              1: S1mpleRandomTPoint(- 3, 5, 0, 20);
             end;
             WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleFish: Completed');
             DidRedClick := true;
-            WriteLn('help');
             exit;
           end;
         end
@@ -436,7 +434,7 @@ begin
   if (not DidRedClick) then
     exit;
   FishSpotFS := 0;
-  FishWaitLimit := RandomRange(3333, 13333);
+  FishWaitLimit := RandomRange(7777, 13333);
   FishWaitTimer.Start;
   AFKBox := [AFKBound1, AFKBound2, AFKBound3, AFKBound4];
   WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleAFK: Commencing');
@@ -453,12 +451,12 @@ begin
       18 .. 20: Mouse.Scroll(20, false);
     end;
     while (not FindDTM(IsFishingDTM, x, y, OverlayBox)) and (FishWaitTimer.ElapsedTime() <= FishWaitLimit) do
-      begin
-        WaitEx(100, 10);
-        if Chat.IsOpen then
-          exit;
-      end;
-    while (FindDTM(IsFishingDTM, x, y, OverlayBox)) do
+    begin
+      WaitEx(142, 112);
+      if Chat.IsOpen then
+        exit;
+    end;
+    if (FindDTM(IsFishingDTM, x, y, OverlayBox)) then
       S1mpleBreak();
   end
   else if (not FindDTM(IsFishingDTM, x, y, OverlayBox)) and (FishWaitTimer.ElapsedTime() <= FishWaitLimit) then
@@ -471,42 +469,46 @@ var
   i: Int32;
   slots: array of Int32;
 begin
+  DontDropSlots := [DontDropSlot1, DontDropSlot2, DontDropSlot3, DontDropSlot4, DontDropSlot5];
   if login.IsOpen then
     exit;
   if Chat.IsOpen then
   begin
     if not Inventory.IsOpen then
       Inventory.Open;
-    WaitEx(100, 100);
-    if (not Inventory.FindItems(FishingGearItemUpText)) then
+    if (not Inventory.FindItems(FishingGearUpText)) then
     begin
-      WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleDrop: One or more UserItems not found');
+      WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleDrop: One or more FishingGearUpTexts not found');
       S1mpleTerminate();
     end;
     WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleDrop: Commencing');
     case random(10) of
       0 .. 8:
         begin
-          slots := [0..27];
+          slots := [0, 1, 2, 3, 7, 6, 5, 4, 8, 9, 10, 11, 15, 14, 13, 12, 16, 17, 18, 19, 23, 22, 21, 20, 24, 25, 26, 27];
         end;
       9:
         begin
-          slots := [0,4,8,12,16,20,24,  1,5,9,13,17,21,25,  2,6,10,14,18,22,26, 3,7,11,15,19,23,27];
+          slots := [0, 4, 8, 12, 16, 20, 24, 1, 5, 9, 13, 17, 21, 25, 2, 6, 10, 14, 18, 22, 26, 3, 7, 11, 15, 19, 23, 27];
         end;
+    end;
+    if DropALLItems = False then
+    begin
+      for i in DontDropSlots do
+        if i in slots then
+          S1mpleRemove(slots, i);
     end;
     for i := Low(slots) to High(slots) do
       Inventory.ClickSlot(slots[i]);
     WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleDrop: Completed');
     if Inventory.IsOpen then
     begin
-      WaitEx(500, 250);
+      WaitEx(250, 240);
       Keyboard.PressKey(VK_ESCAPE);
     end;
     S1mpleDTM();
     exit;
-  end
-  else
-    exit;
+  end;
 end;
 
 procedure S1mpleSetup();
