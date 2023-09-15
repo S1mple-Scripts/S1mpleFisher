@@ -15,7 +15,7 @@ This is a fishing bot script that allows you to fish anywhere in OSRS with ease 
 - Simba installed. Simba is a program that can simulate mouse and keyboard actions. You can download Simba from [here](https://github.com/Villavu/Simba/releases/download/simba1400-release/Simba-Win32.exe). Make sure you use the **32-bit** version of Simba, follow this setup guide [here](https://villavu.com/forum/showthread.php?t=177730), and have the SRL-OSR include installed.
 - A RuneLite client. RuneLite is a free and open-source client for OSRS that provides various features and plugins. You can download RuneLite from [here](https://runelite.net/).
 - An OSRS account. You can create an OSRS account from [here](https://oldschool.runescape.com/).
-- The required items depending on the fishing method you want to use.
+- The required items depending on the fishing method you are using.
 
 ### Installation
 - Download the latest version of the bot script from [here](https://github.com/S1mple-Scripts/S1mpleFisher/releases/tag/v1.0) and save the .simba file in your Simba scripts folder.
