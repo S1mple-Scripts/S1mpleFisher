@@ -18,7 +18,7 @@ This is a fishing bot script that allows you to fish anywhere in OSRS with ease 
 - The required items depending on the fishing method you are using.
 
 ### Installation
-- Download the latest version of the bot script from [here](https://github.com/S1mple-Scripts/S1mpleFisher/releases/tag/v1.0) and save the .simba file in your Simba scripts folder.
+- Download the latest version of the bot script from [here](https://github.com/S1mple-Scripts/S1mpleFisher/releases) and save the .simba file in your Simba scripts folder.
 - Run Simba and load the bot script.
 - Modify the script setup details in Simba on lines 7-42.
 - Run RuneLite, load the provided RuneLite Profile, and then log into your OSRS account.
