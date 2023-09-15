@@ -33,7 +33,8 @@ This is a bot script that allows you to fish in OSRS with ease and speed using S
 - Start the bot script in Simba.
 
 ### Proggies
-![S1mpleFisher 10Hr Proggy](https://github.com/S1mple-Scripts/S1mpleFisher/assets/144496153/115f4607-75a1-42a5-8087-ee3857566edf)
+![S1mpleFisher 10Hr Proggy Small](https://github.com/S1mple-Scripts/S1mpleFisher/assets/144496153/8d63939d-b477-4be4-934c-55ab3d77aa64)
+
 ### Disclaimer
 - This bot script is for educational purposes only and should not be used to gain an unfair advantage in OSRS. Use it at your own risk.
 - This bot script is not affiliated with or endorsed by Jagex, the developer of OSRS.
