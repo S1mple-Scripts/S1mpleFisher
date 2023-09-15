@@ -47,6 +47,7 @@ var
   RunTimer: TStopWatch;
   FishingGearUpText: TRSItemArray = [FishingGearUpText1, FishingGearUpText2, FishingGearUpText3, FishingGearUpText4];
   DontDropSlots: array of Int32;
+  Count: Integer;
 
 {***************************************************************************************************
  ***************************************************************************************************
@@ -152,7 +153,7 @@ begin
       Result := True;
     end;
   end;
-end; 
+end;
 
 {S1MPLE FUNCTIONS BELOW}
 function S1mpleBreak(): Integer;
@@ -166,35 +167,39 @@ var
 begin
   StartTime := Now;
   DoubleTime := EncodeTime(0, RandomRange(15, 60), 0, 0);
-  case Random(101) of
-    1 .. 70:
-      begin
-        Time1 := 0;
-        Time2 := 60000;
-      end;
-    71 .. 83:
+  if (Count >= 100) and (Random(101) > 96) then
+  begin
+    Time1 := 1800000;
+    Time2 := 2700000;
+    StartTime := Now;
+    DoubleTime := EncodeTime(0, RandomRange(15, 60), 0, 0);
+  end
+  else if (Count >= 80) and (Random(96) > 91) then
+  begin
+    Time1 := 180000;
+    Time2 := 900000;
+  end
+  else if (Count >= 60) and (Random(91) > 83) then
+  begin
+    Time1 := 120000;
+    Time2 := 180000;
+  end
+  else
+  begin
+    case Random(83) of
+      1 .. 70:
+        begin
+          Time1 := 0;
+          Time2 := 60000;
+        end;
+      else
       begin
         Time1 := 0;
         Time2 := 120000;
       end;
-    84 .. 91:
-      begin
-        Time1 := 120000;
-        Time2 := 180000;
-      end;
-    92 .. 96:
-      begin
-        Time1 := 180000;
-        Time2 := 900000;
-      end;
-    97 .. 100:
-      begin
-        Time1 := 1800000;
-        Time2 := 2700000;
-        StartTime := Now;
-        DoubleTime := EncodeTime(0, RandomRange(15, 60), 0, 0);
-      end;
+    end;
   end;
+  Count := Count + 1;
   Result := RandomRange(Time1, Time2 + 1);
   if (Now - StartTime >= DoubleTime) then
     Result := Result * 2;
