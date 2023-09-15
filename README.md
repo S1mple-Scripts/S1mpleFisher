@@ -4,10 +4,10 @@
 This is a bot script that allows you to fish in OSRS with ease and speed using Simba and RuneLite. It can automatically drop the fish and mimic a real player’s afk behaviour at different fishing locations. It is a simple, efficient, and safe solution for fishing automation.
 
 ### Features
-- Excludes certain items from dropping when specified by the user.
+- Excludes certain slots from being dropped when specified by the user.
 - Mimics a real player’s inactivity and afk behaviour.
-- Supports breaking to log out and rest for a random duration that is determined by the script.
-- Provides a simple and user-friendly interface that enables the user to adjust the bot settings within Simba.
+- Supports AFK timeout breaking.
+- Provides a simple and user-friendly script setup that easily enables the user to adjust the bot settings within Simba.
 
 ### Requirements
 - Simba installed. Simba is a program that can simulate mouse and keyboard actions. You can download Simba from [here](https://github.com/Villavu/Simba/releases/download/simba1400-release/Simba-Win32.exe). Make sure you use the **32-bit** version of Simba and follow this setup guide [here](https://villavu.com/forum/showthread.php?t=177730).
@@ -18,7 +18,7 @@ This is a bot script that allows you to fish in OSRS with ease and speed using S
 ### Installation
 - Download the latest version of the bot script from [here](https://github.com/S1mple-Scripts/S1mpleFisher/releases/tag/v1.0) and save the .simba file in your Simba scripts folder.
 - Run Simba and load the bot script.
-- Add/modify the script setup details in Simba on lines 7-42.
+- Modify the script setup details in Simba on lines 7-42.
 - Run RuneLite, load the provided RuneLite Profile, and then log into your OSRS account.
   - Modify the 'Custom Left Click' plugin to include ALL items that will fill up your inventory.
   - Modify the 'NPC Indicators' plugin:
@@ -26,9 +26,9 @@ This is a bot script that allows you to fish in OSRS with ease and speed using S
   - Enable 'Highlight Tile'.
   - Set 'Highlight Color' and 'Fill Color' to 'FFE7FF00'.
   - Set 'NPCs to Highlight' to include the Up_Text of the fishing spot you are wanting to click.
-- Setup the client by following the instructions in this video [here](https://youtu.be/Mpsp5wEUsPc?feature=shared).
-- Go to the fishing spot you want to fish at and make sure you have the required fishing equipment in your inventory.
-- Start the bot script in Simba and follow any instructions.
+- You can watch a brief setup video [here](https://youtu.be/Mpsp5wEUsPc?feature=shared).
+- Go to the fishing spot you want to fish at with the required fishing equipment in your inventory.
+- Start the bot script in Simba.
 
 ### Disclaimer
 - This bot script is for educational purposes only and should not be used to gain an unfair advantage in OSRS. Use it at your own risk.
