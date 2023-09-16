@@ -2,7 +2,7 @@ program S1mpleFisher;
 {$I SRL/osr.simba}
 //{$DEFINE SRL_DISABLE_REMOTEINPUT}
 const
-  Local_Version := 1.2.1;
+  Local_Version := 1.25;
 
 {Script session time in minutes}
   RunTime = (124);
