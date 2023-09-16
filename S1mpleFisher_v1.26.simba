@@ -431,6 +431,8 @@ begin
     MainScreen.SetHighestPitch();
     FirstLogin := False;
   end;
+  if Inventory.IsOpen then
+    Keyboard.PressKey(VK_ESCAPE);
   OverlayBox := IntToBox(0, 0, 222, 222);
   if (not DidRedClick) then
     exit;
@@ -503,11 +505,6 @@ begin
     for i := Low(slots) to High(slots) do
       Inventory.ClickSlot(slots[i]);
     WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleDrop: Completed');
-    if Inventory.IsOpen then
-    begin
-      WaitEx(250, 240);
-      Keyboard.PressKey(VK_ESCAPE);
-    end;
     S1mpleDTM();
     exit;
   end;
