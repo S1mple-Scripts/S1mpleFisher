@@ -2,7 +2,7 @@ program S1mpleFisher;
 {$I SRL/osr.simba}
 //{$DEFINE SRL_DISABLE_REMOTEINPUT}
 const
-  Local_Version := 1.25;
+  Local_Version := 1.26;
 
 {Script session time in minutes}
   RunTime = (124);
@@ -13,9 +13,9 @@ const
 
 {Where your mouse should AFK  – YOU MUST SET THESE FOR THE SCRIPT TO WORK PROPERLY!}
   AFKBoundX1 = 0;
-  AFKBoundY1 = ;
-  AFKBoundX2 = ;
-  AFKBoundY2 = ;
+  AFKBoundY1 = 0;
+  AFKBoundX2 = 0;
+  AFKBoundY2 = 0;
 
 {Unique user mouse settings – Please adjust to increase your unique user profile}
   MouseSpeed = (13);
@@ -31,22 +31,18 @@ const
   FishingGearUpText3 = 'Feather';
   FishingGearUpText4 = 'Feather';
 
-{Do you want to drop your entire inventory?}
+{Only set to True if you want to drop everything in your inventory – All 28 slots!}
   DropALLItems := False;
 
-{Slots to not drop – IGNORE IF DROPALLITEMS SET TO TRUE!}
-  DontDropSlot1 = 0;
-  DontDropSlot2 = 1;
-  DontDropSlot3 = 0;
-  DontDropSlot4 = 0;
-  DontDropSlot5 = 0;
+{@@ If DropALLItems is set to False, please go to line 474 to choose the slots that you don't want to drop @@}
+{@@ If DropALLItems is set to False, please go to line 474 to choose the slots that you don't want to drop @@}
+{@@ If DropALLItems is set to False, please go to line 474 to choose the slots that you don't want to drop @@}
 
 var
   DidRedClick, TimeUp, FirstLogin, DTMFirstTime: Boolean;
   IsFishingDTM, FishSpotFS, RunTimeConverted: Int32;
   RunTimer: TStopWatch;
   FishingGearUpText: TRSItemArray = [FishingGearUpText1, FishingGearUpText2, FishingGearUpText3, FishingGearUpText4];
-  DontDropSlots: array of Int32;
   Count: Integer;
 
 {***************************************************************************************************
@@ -472,9 +468,10 @@ end;
 procedure S1mpleDrop();
 var
   i: Int32;
-  slots: array of Int32;
+  slots, DontDropSlots: array of Int32;
+  
 begin
-  DontDropSlots := [DontDropSlot1, DontDropSlot2, DontDropSlot3, DontDropSlot4, DontDropSlot5];
+  DontDropSlots := [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   if login.IsOpen then
     exit;
   if Chat.IsOpen then
