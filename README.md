@@ -29,6 +29,7 @@ This is a fishing bot script that allows you to fish anywhere in OSRS with ease 
     - Set 'Highlight Color' and 'Fill Color' to 'FFE7FF00'.
     - Set 'NPCs to Highlight' to include the Up_Text of the fishing spot you are wanting to click.
 - You can watch the video [here](https://youtu.be/Mpsp5wEUsPc?feature=shared) to see a little bit of the recommended setup.
+  - *Only tested to run in Resizable Classic* 
 - Go to the fishing spot you want to fish at with the required fishing equipment in your inventory.
 - Start the bot script in Simba.
 
