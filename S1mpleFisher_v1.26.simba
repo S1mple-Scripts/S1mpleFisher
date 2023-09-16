@@ -432,7 +432,10 @@ begin
     FirstLogin := False;
   end;
   if Inventory.IsOpen then
+  begin
+    wait(RandomRange(0, 300));
     Keyboard.PressKey(VK_ESCAPE);
+  end;
   OverlayBox := IntToBox(0, 0, 222, 222);
   if (not DidRedClick) then
     exit;
