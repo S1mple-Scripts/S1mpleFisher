@@ -2,7 +2,7 @@ program S1mpleFisher;
 {$I SRL/osr.simba}
 //{$DEFINE SRL_DISABLE_REMOTEINPUT}
 const
-  Local_Version := 1.2;
+  Local_Version := 1.2.1;
 
 {Script session time in minutes}
   RunTime = (124);
@@ -13,9 +13,9 @@ const
 
 {Where your mouse should AFK  – YOU MUST SET THESE FOR THE SCRIPT TO WORK PROPERLY!}
   AFKBound1 = 0;
-  AFKBound2 = 0;
-  AFKBound3 = 0;
-  AFKBound4 = 0;
+  AFKBound2 = ;
+  AFKBound3 = ;
+  AFKBound4 = ;
 
 {Unique user mouse settings – Please adjust to increase your unique user profile}
   MouseSpeed = (13);
@@ -27,7 +27,7 @@ const
 
 {Fishing gear up text for items you need in your inventory – YOU MUST SET THESE FOR THE SCRIPT TO WORK PROPERLY!}
   FishingGearUpText1 = 'Fly fishing rod';
-  FishingGearUpText2 = 'Feather';
+  FishingGearUpText2 = 'Fly fishing rod';
   FishingGearUpText3 = 'Feather';
   FishingGearUpText4 = 'Feather';
 
@@ -481,7 +481,7 @@ begin
   begin
     if not Inventory.IsOpen then
       Inventory.Open;
-    if (not Inventory.FindItems(FishingGearUpText)) then
+    if (not Inventory.ContainsAll(FishingGearUpText)) then
     begin
       WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleDrop: One or more FishingGearUpTexts not found');
       S1mpleTerminate();
