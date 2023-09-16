@@ -11,7 +11,7 @@ const
   LOGIN_NAME = '';
   LOGIN_PASS = '';
 
-{Where your mouse should AFK  – YOU MUST SET THESE FOR THE SCRIPT TO WORK PROPERLY!}
+{Where your mouse should AFK outside of the RuneLite client – YOU MUST SET THESE OUTSIDE OF THE RUNELITE CLIENT FOR THE SCRIPT TO WORK PROPERLY!}
   AFKBoundX1 = 0;
   AFKBoundY1 = 0;
   AFKBoundX2 = 0;
