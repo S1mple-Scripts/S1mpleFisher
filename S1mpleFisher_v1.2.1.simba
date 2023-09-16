@@ -12,10 +12,10 @@ const
   LOGIN_PASS = '';
 
 {Where your mouse should AFK  – YOU MUST SET THESE FOR THE SCRIPT TO WORK PROPERLY!}
-  AFKBound1 = 0;
-  AFKBound2 = ;
-  AFKBound3 = ;
-  AFKBound4 = ;
+  AFKBoundX1 = 0;
+  AFKBoundY1 = ;
+  AFKBoundX2 = ;
+  AFKBoundY2 = ;
 
 {Unique user mouse settings – Please adjust to increase your unique user profile}
   MouseSpeed = (13);
@@ -441,7 +441,7 @@ begin
   FishSpotFS := 0;
   FishWaitLimit := RandomRange(7777, 13333);
   FishWaitTimer.Start;
-  AFKBox := [AFKBound1, AFKBound2, AFKBound3, AFKBound4];
+  AFKBox := [AFKBoundX1, AFKBoundY1, AFKBoundX2, AFKBoundY2];
   WriteLn([(SRL.TimeRunning(Time_Abbrev))], 'S1mpleAFK: Commencing');
   case random(20) of
     0 .. 15: AFK := True;
